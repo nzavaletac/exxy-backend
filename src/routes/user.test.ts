@@ -16,6 +16,49 @@ describe('user', () => {
     await disconnect();
   });
 
+  test('login successful', async () => {
+    const user = {
+      email: 'test@test.com',
+      password: 'Password123*',
+      isCompleted: true,
+    };
+
+    await User.create(user);
+    const res = await req(app).post('/users/login').send(user);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.message).toMatch(/ingreso exitoso/i);
+    expect(res.body).toHaveProperty('token');
+    expect(res.body.token).toMatch(
+      /^[a-zA-Z0-9\-_]+?\.[a-zA-Z0-9\-_]+?\.([a-zA-Z0-9\-_]+)?$/
+    );
+  });
+
+  test('login unsuccessful wrong email or password', async () => {
+    const user = {
+      email: 'test@test.com',
+      password: 'Password123*',
+      isCompleted: true,
+    };
+
+    await User.create(user);
+    const resInvalidPassword = await req(app)
+      .post('/users/login')
+      .send({ ...user, password: 'wrongPassword123*' });
+    const resInvalidEmail = await req(app)
+      .post('/users/login')
+      .send({ ...user, email: 'wrong@email.com' });
+
+    expect(resInvalidPassword.statusCode).toBe(400);
+    expect(resInvalidPassword.body.message).toMatch(
+      /email o contraseña inválida/i
+    );
+    expect(resInvalidEmail.statusCode).toBe(400);
+    expect(resInvalidEmail.body.message).toMatch(
+      /email o contraseña inválida/i
+    );
+  });
+
   test('complete registration invalid password error', async () => {
     const userInvalidLength = { email: 'test1@test.com', password: 'Pass1*' };
     const userInvalidSymbols = {
