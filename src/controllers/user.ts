@@ -3,6 +3,7 @@ import { RequestHandler } from 'express';
 import { Error } from 'mongoose';
 import bcrypt from 'bcrypt';
 import { User } from '../models/user';
+import { Namespace } from '../models/namespace';
 import { ResponseError } from '../utils/errorHandler';
 
 export const register: RequestHandler = async (req, res, next) => {
@@ -24,6 +25,11 @@ export const register: RequestHandler = async (req, res, next) => {
         )
       );
       return;
+    }
+
+    const namespace = await Namespace.findOne({ user: user._id });
+    if (!namespace) {
+      await Namespace.create({ name: 'default', user: user._id });
     }
 
     user.password = password;

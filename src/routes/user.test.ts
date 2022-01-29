@@ -1,4 +1,5 @@
 import { User } from '../models/user';
+import { Namespace } from '../models/namespace';
 import { connect, disconnect, cleanup } from '../database';
 import { app } from '../app';
 import req from 'supertest';
@@ -124,6 +125,23 @@ describe('user', () => {
     expect(res.body.message).toMatch(
       /este usuario ya completó su registro previamente/i
     );
+  });
+
+  test('complete registration create default namespace', async () => {
+    const data = { email: 'test@test.com', password: 'Password123*' };
+
+    const user = await User.create({ email: data.email });
+
+    await req(app).post('/users/register').send(data);
+
+    const namespace = await Namespace.findOne({ user: user._id });
+
+    if (!namespace) {
+      throw new Error('namespace is null');
+    }
+
+    expect(namespace).not.toBeNull();
+    expect(namespace.name).toMatch(/default/i);
   });
 
   test('complete registration success', async () => {

@@ -6,6 +6,7 @@ import morgan from 'morgan';
 import { errorHandler } from './utils/errorHandler';
 import { baseRouter } from './routes';
 import { userRouter } from './routes/user';
+import { namespaceRouter } from './routes/namespace';
 
 dotenv.config({
   path: path.resolve(
@@ -23,6 +24,7 @@ app.use(cors());
 app.use(morgan('dev'));
 
 app.use('/users', userRouter);
+app.use('/namespaces', namespaceRouter);
 app.use('/', baseRouter);
 
 app.use(errorHandler);
