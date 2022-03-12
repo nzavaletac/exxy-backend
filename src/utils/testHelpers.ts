@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import { Category, ICategory } from '../models/categories';
 import { INamespace, Namespace } from '../models/namespace';
 import { IUser, User } from '../models/user';
+import { Expense, IExpense } from '../models/expense';
 import { TOKEN_EXPIRATION } from './constants';
 
 interface TestUser {
@@ -10,11 +11,15 @@ interface TestUser {
   isCompleted?: boolean;
 }
 
-export const createUser = async ({
+interface CreateUser {
+  (user?: TestUser): Promise<IUser>;
+}
+
+export const createUser: CreateUser = async ({
   email = 'test@test.com',
   password = 'Password123*',
   isCompleted = true,
-}: TestUser): Promise<IUser> => {
+} = {}) => {
   return await User.create({ email, password, isCompleted });
 };
 
@@ -46,4 +51,31 @@ export const createCategory = async ({
   namespace,
 }: TestCategory): Promise<ICategory> => {
   return await Category.create({ name, namespace: namespace._id });
+};
+
+interface TestExpense {
+  merchant?: string;
+  date?: Date;
+  currency?: string;
+  amount?: number;
+  description?: string;
+  category: ICategory;
+}
+
+export const createExpense = async ({
+  merchant = 'Test Merchant',
+  date = new Date(),
+  currency = 'COP',
+  amount = 10000,
+  description = 'Test Description',
+  category,
+}: TestExpense): Promise<IExpense> => {
+  return await Expense.create({
+    merchant,
+    date,
+    currency,
+    amount,
+    description,
+    category: category._id,
+  });
 };
